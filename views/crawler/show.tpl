@@ -1,0 +1,1 @@
+C:\Users\tino\go\src\FictionCrawler/views/crawler/show.tpl
