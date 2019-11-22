@@ -112,13 +112,29 @@ func crawler(crawUrl string, queue chan int) []fictionCrawler {
 
 	// 爬蟲
 	var result []fictionCrawler
-	doc.Find("span[itemprop=name]").Each(func(i int, selection *goquery.Selection) {
+
+	var tmpNameList []string
+	doc.Find("div[class=list2] span[itemprop=name]").Each(func(i int, selection *goquery.Selection) {
 		logs.Debug("selection.Text(): ", selection.Text())
-		result = append(result, fictionCrawler{
-			Name: selection.Text(),
-			Url:  "aaa",
-		})
+		tmpNameList = append(tmpNameList, selection.Text())
 	})
+
+	// 搜尋小說Url
+	var tmpUrlList []string
+	doc.Find("h3>a").Each(func(i int, selection *goquery.Selection) {
+		href, ok := selection.Attr("href")
+		if !ok {
+			logs.Debug("error")
+		}
+		tmpUrlList = append(tmpUrlList, href)
+	})
+
+	for i := 0; i < 10; i++ {
+		result = append(result, fictionCrawler{
+			Name: tmpNameList[i],
+			Url:  tmpUrlList[i],
+		})
+	}
 
 	return result
 }
