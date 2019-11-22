@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -16,6 +17,7 @@ type CrawlerController struct {
 }
 
 type fictionCrawler struct {
+	Id   int
 	Name string
 	Url  string
 }
@@ -27,13 +29,16 @@ func (c *CrawlerController) Get() {
 
 	c.Data["Test"] = "beego.me"
 
-	url := "http://big5.quanben.io/c/xuanhuan.html"
+	preUrl := "http://big5.quanben.io/c/xuanhuan_"
+	proUrl := ".html"
 	queue := make(chan int, 1)
 	go func() {
 		queue <- 1
 	}()
 
-	result = append(result, crawler(url, make(chan int, 1))...)
+	for page := 1; page <= 10; page++ {
+		result = append(result, crawler(preUrl, page, proUrl, make(chan int, 1))...)
+	}
 
 	c.Data["s"] = result
 	c.TplName = "crawler/index.tpl"
@@ -87,7 +92,8 @@ func (c *CrawlerController) GetAll() {
 }
 
 // private funciton
-func crawler(crawUrl string, queue chan int) []fictionCrawler {
+func crawler(preUrl string, page int, proUrl string, queue chan int) []fictionCrawler {
+	crawUrl := preUrl + strconv.Itoa(page) + proUrl
 	visited[crawUrl] = true
 	timeout := time.Duration(10 * time.Second)
 	client := &http.Client{
@@ -129,10 +135,11 @@ func crawler(crawUrl string, queue chan int) []fictionCrawler {
 		tmpUrlList = append(tmpUrlList, href)
 	})
 
-	for i := 0; i < 10; i++ {
+	for idx, _ := range tmpNameList {
 		result = append(result, fictionCrawler{
-			Name: tmpNameList[i],
-			Url:  tmpUrlList[i],
+			Id:   (page-1)*12 + idx + 1,
+			Name: tmpNameList[idx],
+			Url:  tmpUrlList[idx],
 		})
 	}
 
