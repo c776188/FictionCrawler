@@ -8,12 +8,14 @@ window.onload = function() {
         el: '#app',
         data: {
             pages: 1,
+            isCrawlerTable: false,
             crawlerData: [
                 {}
             ]
         },
         methods: {
             callCrawler() {
+                this.isCrawlerTable = false;
                 var self = this;
                 $.ajax({
                     type: 'POST',
@@ -21,6 +23,7 @@ window.onload = function() {
                     data: { 'page': this.pages },
                     success: function(data) {
                         self.crawlerData = data;
+                        self.isCrawlerTable = true;
                     }
                 });
             }
