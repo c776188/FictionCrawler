@@ -25,22 +25,6 @@ type fictionCrawler struct {
 var visited = make(map[string]bool)
 
 func (c *CrawlerController) Get() {
-	var result []fictionCrawler
-
-	c.Data["Test"] = "beego.me"
-
-	preUrl := "http://big5.quanben.io/c/xuanhuan_"
-	proUrl := ".html"
-	queue := make(chan int, 1)
-	go func() {
-		queue <- 1
-	}()
-
-	for page := 1; page <= 10; page++ {
-		result = append(result, crawler(preUrl, page, proUrl, make(chan int, 1))...)
-	}
-
-	c.Data["s"] = result
 	c.TplName = "crawler/index.tpl"
 }
 
@@ -61,7 +45,23 @@ func (c *CrawlerController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *CrawlerController) Post() {
+	pages, _ := c.GetInt("page")
 
+	var result []fictionCrawler
+
+	preUrl := "http://big5.quanben.io/c/xuanhuan_"
+	proUrl := ".html"
+	queue := make(chan int, 1)
+	go func() {
+		queue <- 1
+	}()
+
+	for page := 1; page <= pages; page++ {
+		result = append(result, crawler(preUrl, page, proUrl, make(chan int, 1))...)
+	}
+
+	c.Data["json"] = &result
+	c.ServeJSON()
 }
 
 // GetOne ...
